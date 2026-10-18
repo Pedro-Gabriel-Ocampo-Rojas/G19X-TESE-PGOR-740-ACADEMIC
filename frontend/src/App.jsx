@@ -8,8 +8,8 @@ import { Users, UserCheck, UserMinus, Activity, LogOut, Lock, PlusCircle, Trash2
 // 1. PANTALLA DE INICIO DE SESIÓN
 // ==========================================
 function Login() {
-  const [email, setEmail] = useState('admin@plurione.com')
-  const [password, setPassword] = useState('admin123')
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
   const navigate = useNavigate()
