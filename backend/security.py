@@ -1,11 +1,17 @@
+import os
+from dotenv import load_dotenv
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
 
-# En un entorno real de producción, esta clave secreta viviría oculta en un archivo .env
-CLAVE_SECRETA = "plurione_tese_secreto_2026"
-ALGORITMO = "HS256"
-TIEMPO_EXPIRACION_MINUTOS = 60 # El gafete virtual durará 1 hora
+# Carga las variables del archivo .env
+load_dotenv()
+
+# Lee la clave desde el .env
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "fallback_secret_key")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
 
 def verificar_password(password_plana, password_encriptada):
     """Compara la contraseña que escribe el usuario con el hash de PostgreSQL"""
