@@ -36,7 +36,7 @@ El proyecto está dividido en dos servicios principales:
 
 ---
 
-##  Guía de Instalación y Orden de Arranque
+## 3. Guía de Instalación y Orden de Arranque
 
 Para ejecutar este proyecto de forma local, sigue estos pasos en estricto orden:
 
