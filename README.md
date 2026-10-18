@@ -36,59 +36,47 @@ El proyecto está dividido en dos servicios principales:
 
 ---
 
-## 3. Instrucciones de Instalación y Despliegue
+##  Guía de Instalación y Orden de Arranque
 
-### Configuración del Servidor (Backend)
+Para ejecutar este proyecto de forma local, sigue estos pasos en estricto orden:
 
-1. Desde la terminal, ingresa a la carpeta `backend`:
+1. **Configuración de Base de Datos:**
+   Crea una base de datos vacía en PostgreSQL llamada exactamente `PluriOne_db`.
+
+2. **Variables de Entorno:**
+   Dentro de la carpeta `backend/`, copia el archivo `.env.example`, renómbralo a `.env` y actualiza las credenciales (`DATABASE_URL` y `JWT_SECRET_KEY`) con tus datos locales.
+
+3. **Inicialización del Backend (Ejecutar en este orden exacto):**
+   Abre una terminal en la carpeta `backend/` y ejecuta:
+   
    ```bash
-   cd backend
-   ```
-
-2. Crea y activa el entorno virtual:
-   - **En Windows (PowerShell):**
-     ```powershell
-     python -m venv venv
-     .\venv\Scripts\Activate.ps1
-     ```
-   - **En Linux/macOS:**
-     ```bash
-     python3 -m venv venv
-     source venv/bin/activate
-     ```
-
-3. Instala las dependencias:
-   ```bash
+   # Activar entorno virtual e instalar dependencias
+   python -m venv venv
+   source venv/Scripts/activate  # En Windows
    pip install -r requirements.txt
-   ```
-
-4. Asegúrate de tener PostgreSQL corriendo con la base de datos `plurione_db` (o ajusta la URL de conexión en tu archivo `database.py`).
-
-5. Inicia el servidor:
-   ```bash
+   
+   # 1. Crear la estructura de tablas en la base de datos
+   python init_db.py
+   
+   # 2. Poblar la base de datos con información sintética
+   python seed_data.py
+   
+   # 3. Entrenar y exportar el modelo de Machine Learning
+   python ml/train_model.py
+   
+   # 4. Generar credenciales de Administrador por defecto
+   python crear_admin.py
+   
+   # 5. Levantar el servidor backend
    uvicorn main:app --reload
-   ```
-   > El servidor estará disponible en: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-
----
-
-### Configuración de la Interfaz (Frontend)
-
-1. Abre una nueva terminal e ingresa a la carpeta `frontend`:
-   ```bash
-   cd frontend
-   ```
-
-2. Instala los módulos de Node:
+4. **Inicialización del Frontend:**
+   Abre otra terminal en la carpeta `frontend/` y ejecuta:
+   
    ```bash
    npm install
-   ```
-
-3. Inicia el servidor de desarrollo:
-   ```bash
    npm run dev
    ```
-   > La aplicación web estará disponible en: [http://localhost:5173](http://localhost:5173)
+   > El servidor estará disponible en: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
 ---
 
