@@ -20,6 +20,21 @@ app = FastAPI(
     version="2.1.0"
 )
 
+# --- CONFIGURACIÓN DE SEGURIDAD PARA ENDPOINTS ---
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/login")
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        # Intenta desencriptar el token usando tu clave secreta
+        payload = jwt.decode(token, CLAVE_SECRETA, algorithms=[ALGORITMO])
+        usuario: str = payload.get("sub")
+        if usuario is None:
+            raise HTTPException(status_code=401, detail="Credenciales inválidas")
+        return usuario
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Token inválido o expirado")
+# -------------------------------------------------
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -92,7 +107,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     return {"access_token": token, "token_type": "bearer"}
 
 @app.get("/api/v1/empleados")
-async def obtener_empleados(db: AsyncSession = Depends(get_db)):
+async def obtener_empleados(db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
     # Cruzamos empleados con su salario y evaluación sin NINGÚN límite
     query = (
         select(
@@ -123,7 +138,7 @@ async def obtener_empleados(db: AsyncSession = Depends(get_db)):
     return {"total_mostrados": len(datos), "datos": datos}
 
 @app.post("/api/v1/predicciones/simulador")
-async def simular_riesgo(datos: SimulacionRiesgo):
+async def simular_riesgo(datos: SimulacionRiesgo, current_user = Depends(get_current_user)):
     if modelo_ia is None:
         raise HTTPException(status_code=500, detail="El modelo predictivo no está disponible.")
     df_entrada = pd.DataFrame([{"distancia_km": datos.distancia_km, "salario": datos.salario, "desempeno": datos.desempeno}])
