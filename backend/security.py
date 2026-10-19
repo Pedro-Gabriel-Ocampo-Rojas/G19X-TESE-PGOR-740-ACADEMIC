@@ -8,9 +8,9 @@ from datetime import datetime, timedelta
 load_dotenv()
 
 # Lee la clave desde el .env
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "fallback_secret_key")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+CLAVE_SECRETA = os.getenv("JWT_SECRET_KEY", "fallback_secret_key")
+ALGORITMO = "HS256"
+TIEMPO_EXPIRACION_MINUTOS = 60
 
 
 def verificar_password(password_plana, password_encriptada):
