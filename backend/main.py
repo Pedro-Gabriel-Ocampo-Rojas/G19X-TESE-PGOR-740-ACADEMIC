@@ -58,6 +58,7 @@ class SimulacionRiesgo(BaseModel):
     distancia_km: float
     salario: float
     desempeno: float
+    clima_laboral: float
 
 class NuevoEmpleado(BaseModel):
     puesto_id: int
