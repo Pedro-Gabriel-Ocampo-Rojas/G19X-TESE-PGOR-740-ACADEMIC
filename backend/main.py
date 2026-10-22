@@ -123,41 +123,55 @@ async def obtener_empleados(db: AsyncSession = Depends(get_db), current_user = D
 async def simular_riesgo(datos: SimulacionRiesgo, current_user = Depends(get_current_user)):
     if modelo_ia is None:
         raise HTTPException(status_code=500, detail="El modelo predictivo no está disponible.")
-    df_entrada = pd.DataFrame([{"distancia_km": datos.distancia_km, "salario": datos.salario, "desempeno": datos.desempeno}])
+    df_entrada = pd.DataFrame([{
+        "distancia_km": datos.distancia_km, 
+        "salario": datos.salario, 
+        "desempeno": datos.desempeno,
+        "clima_laboral": datos.clima_laboral
+    }])
+    
     prediccion = modelo_ia.predict(df_entrada)[0]
     probabilidad = modelo_ia.predict_proba(df_entrada)[0][1]
     
-    # --- NUEVA LÓGICA: GENERACIÓN DE RAZONAMIENTO (EXPLAINABLE AI) ---
+# --- LÓGICA: GENERACIÓN DE RAZONAMIENTO (EXPLAINABLE AI) ---
     razonamiento = ""
     if prediccion == 1: # ALTO RIESGO
         razones = []
         if datos.distancia_km > 20:
             razones.append("la gran distancia a la oficina genera desgaste diario")
         if datos.salario < 20000:
-            razones.append("el salario mensual se encuentra por debajo del umbral competitivo de retención")
+            razones.append("el salario mensual se encuentra por debajo del umbral competitivo")
         if datos.desempeno > 4.0 and datos.salario < 25000:
-            razones.append("presenta un alto desempeño pero la compensación no es proporcional (alto riesgo de fuga por subvaloración)")
+            razones.append("presenta un alto desempeño pero la compensación no es proporcional")
         elif datos.desempeno < 2.5:
-            razones.append("existe una baja calificación de desempeño que indica falta de motivación o encaje")
+            razones.append("existe una baja calificación de desempeño que indica falta de motivación")
+            
+        # Nueva regla XAI para el clima laboral
+        if datos.clima_laboral < 3.0:
+            razones.append("percibe un clima laboral hostil o deficiente en su área")
             
         if razones:
             razonamiento = "El modelo detecta alto riesgo principalmente porque " + " y ".join(razones) + "."
         else:
-            razonamiento = "El modelo detecta un patrón de riesgo generalizado basado en la combinación de su salario, distancia y evaluación."
+            razonamiento = "El modelo detecta un patrón de riesgo basado en la combinación de sus métricas."
     else: # ESTABLE
         razonamiento = "El perfil presenta métricas saludables de retención. "
         fortalezas = []
         if datos.distancia_km <= 15:
-            fortalezas.append("su cercanía a la oficina reduce el estrés de traslado")
+            fortalezas.append("su cercanía a la oficina reduce el estrés")
         if datos.salario >= 25000:
-            fortalezas.append("cuenta con un salario competitivo dentro del mercado")
+            fortalezas.append("cuenta con un salario competitivo")
         if 3.0 <= datos.desempeno <= 4.5:
-            fortalezas.append("mantiene un desempeño constante y adecuado")
+            fortalezas.append("mantiene un desempeño constante")
+            
+        # Nueva regla XAI para el clima laboral
+        if datos.clima_laboral >= 4.0:
+            fortalezas.append("goza de un ambiente laboral positivo")
             
         if fortalezas:
             razonamiento += "Destaca que " + " y ".join(fortalezas) + "."
         else:
-            razonamiento += "Sus condiciones actuales no muestran indicadores críticos de fuga."
+            razonamiento += "Sus condiciones no muestran indicadores de fuga."
 
     return {
         "alerta": "🔴 ALTO RIESGO DE FUGA" if prediccion == 1 else "🟢 EMPLEADO ESTABLE",
