@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from database import SessionLocal
+from database import SessionLocal, get_db
 from models import Empleado, UsuarioAdmin, HistorialSalario, EvaluacionDesempeno
 from security import verificar_password, crear_token_acceso, CLAVE_SECRETA, ALGORITMO
 import joblib
@@ -52,22 +52,8 @@ except Exception as e:
     modelo_ia = None
     print(f"Advertencia: No se pudo cargar el modelo de IA: {RUTA_MODELO}")
 
-# --- 2. SEGURIDAD JWT ---
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 
-async def obtener_admin_actual(token: str = Depends(oauth2_scheme)):
-    try:
-        payload = jwt.decode(token, CLAVE_SECRETA, algorithms=[ALGORITMO])
-        email: str = payload.get("sub")
-        if email is None:
-            raise HTTPException(status_code=401, detail="Credenciales inválidas")
-        return email
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="El token ha expirado")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Token inválido")
-
-# --- 3. ESQUEMAS ---
+# --- 2. ESQUEMAS ---
 class SimulacionRiesgo(BaseModel):
     distancia_km: float
     salario: float
@@ -85,12 +71,8 @@ class NuevoAdmin(BaseModel):
     password: str
     nombre_completo: str
 
-# --- 4. DEPENDENCIA DB ---
-async def get_db():
-    async with SessionLocal() as session:
-        yield session
 
-# --- 5. ENDPOINTS ---
+# --- 3. ENDPOINTS ---
 @app.get("/")
 async def root():
     return {"mensaje": "Motor Predictivo V2.1 en línea."}
@@ -185,7 +167,7 @@ async def simular_riesgo(datos: SimulacionRiesgo, current_user = Depends(get_cur
     }
 
 @app.post("/api/v1/empleados", summary="Contratar Empleado (Protegido)")
-async def contratar_empleado(empleado: NuevoEmpleado, db: AsyncSession = Depends(get_db), admin: str = Depends(obtener_admin_actual)):
+async def contratar_empleado(empleado: NuevoEmpleado, db: AsyncSession = Depends(get_db), admin: str = Depends(get_current_user)):
     nuevo = Empleado(
         puesto_id=empleado.puesto_id,
         departamento_id=empleado.departamento_id,
@@ -215,7 +197,7 @@ async def contratar_empleado(empleado: NuevoEmpleado, db: AsyncSession = Depends
     return {"mensaje": "Empleado contratado exitosamente", "id": str(nuevo.id), "admin_responsable": admin}
 
 @app.delete("/api/v1/empleados/{empleado_id}", summary="Dar de Baja (Protegido)")
-async def dar_de_baja(empleado_id: uuid.UUID, db: AsyncSession = Depends(get_db), admin: str = Depends(obtener_admin_actual)):
+async def dar_de_baja(empleado_id: uuid.UUID, db: AsyncSession = Depends(get_db), admin: str = Depends(get_current_user)):
     resultado = await db.execute(select(Empleado).filter(Empleado.id == empleado_id))
     emp = resultado.scalars().first()
     
@@ -226,9 +208,9 @@ async def dar_de_baja(empleado_id: uuid.UUID, db: AsyncSession = Depends(get_db)
     await db.commit()
     return {"mensaje": "Empleado dado de baja exitosamente", "admin_responsable": admin}
 
-# --- 7. ENDPOINTS DE ACCESOS (Solo Administradores) ---
+# --- 4. ENDPOINTS DE ACCESOS (Solo Administradores) ---
 @app.get("/api/v1/admins", summary="Listar Administradores (Protegido)")
-async def obtener_admins(db: AsyncSession = Depends(get_db), admin_actual: str = Depends(obtener_admin_actual)):
+async def obtener_admins(db: AsyncSession = Depends(get_db), admin_actual: str = Depends(get_current_user)):
     # Solo devolvemos datos seguros (jamás la contraseña)
     resultado = await db.execute(select(UsuarioAdmin.id, UsuarioAdmin.email, UsuarioAdmin.nombre_completo, UsuarioAdmin.fecha_creacion))
     admins = resultado.all()
@@ -237,7 +219,7 @@ async def obtener_admins(db: AsyncSession = Depends(get_db), admin_actual: str =
     return datos
 
 @app.post("/api/v1/admins", summary="Registrar Nuevo Admin (Protegido)")
-async def crear_admin(datos: NuevoAdmin, db: AsyncSession = Depends(get_db), admin_actual: str = Depends(obtener_admin_actual)):
+async def crear_admin(datos: NuevoAdmin, db: AsyncSession = Depends(get_db), admin_actual: str = Depends(get_current_user)):
     import bcrypt
     
     # Verificamos que el correo no exista ya
