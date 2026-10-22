@@ -113,7 +113,7 @@ function Dashboard() {
   const [cargando, setCargando] = useState(true)
   
   // Simulador
-  const [formSimulador, setFormSimulador] = useState({ distancia_km: 0, salario: 0, desempeno: 0})
+  const [formSimulador, setFormSimulador] = useState({ distancia_km: 0, salario: 0, desempeno: 0, clima_laboral: 0})
   const [resultadoSimulacion, setResultadoSimulacion] = useState(null)
   const [simulando, setSimulando] = useState(false)
 
@@ -318,6 +318,10 @@ Plataforma Administrativa PluriOne
               <label style={{ display: 'block', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '5px' }}>Evaluación (1.0 - 5.0)</label>
               <input type="number" step="0.1" min="1" max="5" required style={{ width: '100%', padding: '8px', borderRadius: '5px', border: '1px solid #cbd5e1' }} value={formSimulador.desempeno} onChange={e => setFormSimulador({...formSimulador, desempeno: e.target.value})} />
             </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '5px' }}>Clima Laboral (1.0 - 5.0)</label>
+              <input type="number" step="0.1" min="1" max="5" required style={{ width: '100%', padding: '8px', borderRadius: '5px', border: '1px solid #cbd5e1' }} value={formSimulador.clima_laboral} onChange={e => setDatosSimulador({ ...formSimulador, clima_laboral: e.target.value })} />
+            </div>
             <button type="submit" disabled={simulando} style={{ padding: '10px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
               {simulando ? 'Analizando...' : 'Ejecutar Predicción'}
             </button>
@@ -387,7 +391,8 @@ function Directorio() {
     puesto_id: 1,
     distancia_oficina_km: 10,
     salario: 25000,
-    desempeno: 3.5
+    desempeno: 3.5,
+    clima_laboral: 1
   })
 
   const cargarDatos = () => {
