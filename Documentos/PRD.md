@@ -69,7 +69,7 @@ El Producto Mínimo Viable (MVP) entregado en esta fase consta de cinco módulos
 ## 7. Tecnologías Utilizadas (Stack Tecnológico)
 
 * **Frontend:** React, React Router, Recharts, Axios, Lucide React, Vite.
-* **Backend:** Python, FastAPI, SQLAlchemy, PyJWT, Passlib (Bcrypt).
+* **Backend:** Python, FastAPI, SQLAlchemy, PyJWT, Bcrypt.
 * **Base de Datos:** PostgreSQL.
 * **Data Science / Machine Learning:** Scikit-Learn (Random Forest Classifier), Pandas, Joblib, NumPy.
 
