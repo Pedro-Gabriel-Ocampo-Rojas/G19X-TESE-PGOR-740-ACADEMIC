@@ -43,7 +43,7 @@ Antes de descomprimir el código, abra una terminal (PowerShell o CMD) y ejecute
 1. Abra pgAdmin 4 o su gestor de bases de datos preferido (DBeaver, DataGrip).
 2. Autentíquese en su servidor local (`localhost`).
 3. Haga clic derecho en **"Databases"** > **"Create"** > **"Database..."**.
-4. En el campo Database, escriba exactamente: `plurione_db`.
+4. En el campo Database, escriba exactamente: `PluriOne_db`.
 5. Guarde los cambios.
 
 ### Vinculación en el Código
@@ -51,7 +51,7 @@ Antes de descomprimir el código, abra una terminal (PowerShell o CMD) y ejecute
 * Localice la variable `SQLALCHEMY_DATABASE_URL` (alrededor de la línea 7).
 * El formato por defecto es:
   ```python
-  postgresql+asyncpg://postgres:admin@localhost/plurione_db
+  postgresql+asyncpg://postgres:admin@localhost/PluriOne_db
   ```
 * Si su usuario de PostgreSQL no es `postgres` o su contraseña no es `admin`, **debe cambiar esos valores** en esa línea de código y guardar el archivo.
 
