@@ -7,11 +7,15 @@ from datetime import datetime, timedelta
 # Carga las variables del archivo .env
 load_dotenv()
 
-# Lee la clave desde el .env
-CLAVE_SECRETA = os.getenv("JWT_SECRET_KEY", "fallback_secret_key")
+# Lee la clave desde el .env sin valor de respaldo
+CLAVE_SECRETA = os.getenv("JWT_SECRET_KEY")
+
+# Lanza un error claro si el usuario olvidó configurar la clave
+if not CLAVE_SECRETA:
+    raise ValueError("ERROR CRÍTICO: La variable de entorno JWT_SECRET_KEY no está configurada en el archivo .env")
+
 ALGORITMO = "HS256"
 TIEMPO_EXPIRACION_MINUTOS = 60
-
 
 def verificar_password(password_plana, password_encriptada):
     """Compara la contraseña que escribe el usuario con el hash de PostgreSQL"""
