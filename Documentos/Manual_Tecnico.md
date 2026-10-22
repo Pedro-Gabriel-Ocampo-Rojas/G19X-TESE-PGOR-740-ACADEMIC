@@ -183,7 +183,6 @@ asyncpg>=0.29.0
 psycopg2-binary>=2.9.9
 pydantic>=2.6.4
 pyjwt>=2.8.0
-passlib[bcrypt]>=1.7.4
 bcrypt>=4.1.2
 scikit-learn>=1.4.0
 pandas>=2.2.0
