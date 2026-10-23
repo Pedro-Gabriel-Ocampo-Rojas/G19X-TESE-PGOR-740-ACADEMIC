@@ -134,7 +134,8 @@ useEffect(() => {
       const respuesta = await api.post('/predicciones/simulador', {
         distancia_km: parseFloat(formSimulador.distancia_km),
         salario: parseFloat(formSimulador.salario),
-        desempeno: parseFloat(formSimulador.desempeno)
+        desempeno: parseFloat(formSimulador.desempeno),
+        clima_laboral: parseFloat(formSimulador.clima_laboral)
       })
       setResultadoSimulacion(respuesta.data)
     } catch (error) { console.error(error) }
@@ -320,7 +321,7 @@ Plataforma Administrativa PluriOne
             </div>
             <div>
               <label style={{ display: 'block', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '5px' }}>Clima Laboral (1.0 - 5.0)</label>
-              <input type="number" step="0.1" min="1" max="5" required style={{ width: '100%', padding: '8px', borderRadius: '5px', border: '1px solid #cbd5e1' }} value={formSimulador.clima_laboral} onChange={e => setDatosSimulador({ ...formSimulador, clima_laboral: e.target.value })} />
+              <input type="number" step="0.1" min="1" max="5" required style={{ width: '100%', padding: '8px', borderRadius: '5px', border: '1px solid #cbd5e1' }} value={formSimulador.clima_laboral} onChange={e => setFormSimulador({ ...formSimulador, clima_laboral: e.target.value })} />
             </div>
             <button type="submit" disabled={simulando} style={{ padding: '10px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
               {simulando ? 'Analizando...' : 'Ejecutar Predicción'}
