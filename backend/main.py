@@ -5,13 +5,14 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from database import SessionLocal, get_db
-from models import Empleado, UsuarioAdmin, HistorialSalario, EvaluacionDesempeno
+from models import Empleado, HistorialSalario, EvaluacionDesempeno, EncuestaClima, Departamento, Puesto, UsuarioAdmin
 from security import verificar_password, crear_token_acceso, CLAVE_SECRETA, ALGORITMO
 import joblib
 import os
 import pandas as pd
 import jwt
 import uuid
+import math
 from datetime import date
 
 app = FastAPI(
@@ -66,6 +67,7 @@ class NuevoEmpleado(BaseModel):
     distancia_oficina_km: int
     salario: float = 25000.0
     desempeno: float = 3.5
+    clima_laboral: float = 4.0
 
 class NuevoAdmin(BaseModel):
     email: str
@@ -96,10 +98,13 @@ async def obtener_empleados(db: AsyncSession = Depends(get_db), current_user = D
         select(
             Empleado,
             HistorialSalario.monto_mensual,
-            EvaluacionDesempeno.puntuacion_kpi
+            EvaluacionDesempeno.puntuacion_kpi,
+            EncuestaClima.satisfaccion_liderazgo,
+            EncuestaClima.balance_vida_trabajo
         )
         .outerjoin(HistorialSalario, Empleado.id == HistorialSalario.empleado_id)
         .outerjoin(EvaluacionDesempeno, Empleado.id == EvaluacionDesempeno.empleado_id)
+        .outerjoin(EncuestaClima, Empleado.id == EncuestaClima.empleado_id)
         .order_by(Empleado.fecha_contratacion.desc())
         # Eliminamos la línea de .limit() para traer el 100% del histórico
     )
@@ -107,7 +112,8 @@ async def obtener_empleados(db: AsyncSession = Depends(get_db), current_user = D
     filas = resultado.all()
     
     datos = []
-    for emp, salario, desempeno in filas:
+    for emp, salario, desempeno, sat_liderazgo, bal_vida in filas:
+        clima_promedio = round(((sat_liderazgo or 3) + (bal_vida or 3)) / 2.0, 1)
         datos.append({
             "id": str(emp.id),
             "departamento_id": emp.departamento_id,
@@ -116,7 +122,8 @@ async def obtener_empleados(db: AsyncSession = Depends(get_db), current_user = D
             "distancia_oficina_km": emp.distancia_oficina_km,
             "estado_activo": emp.estado_activo,
             "salario": salario if salario is not None else 0.0,
-            "desempeno": desempeno if desempeno is not None else 0.0
+            "desempeno": desempeno if desempeno is not None else 0.0,
+            "clima_laboral": clima_promedio
         })
     return {"total_mostrados": len(datos), "datos": datos}
 
@@ -206,6 +213,13 @@ async def contratar_empleado(empleado: NuevoEmpleado, db: AsyncSession = Depends
         puntuacion_kpi=empleado.desempeno,
         cumplimiento_metas=empleado.desempeno * 20
     )
+    nueva_encuesta = EncuestaClima(
+        empleado_id=nuevo.id,
+        fecha_encuesta=date.today(),
+        satisfaccion_liderazgo=int(math.floor(empleado.clima_laboral)),
+        balance_vida_trabajo=int(math.ceil(empleado.clima_laboral))
+    )
+    
     db.add_all([historial, evaluacion])
     await db.commit()
     await db.refresh(nuevo)
