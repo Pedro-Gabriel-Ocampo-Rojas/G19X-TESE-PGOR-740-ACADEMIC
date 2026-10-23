@@ -3,7 +3,14 @@ import random
 from faker import Faker
 from sqlalchemy import select, text
 from database import SessionLocal
-from models import Departamento, Puesto, Empleado, HistorialSalario, EvaluacionDesempeno
+from models import (
+    Departamento,
+    Puesto,
+    Empleado,
+    HistorialSalario,
+    EvaluacionDesempeno,
+    EncuestaClima
+)
 
 fake = Faker('es_MX')
 
@@ -34,8 +41,8 @@ async def generar_datos_sinteticos():
         depto_ids = [row[0] for row in (await db.execute(select(Departamento.id))).all()]
         puesto_ids = [row[0] for row in (await db.execute(select(Puesto.id))).all()]
 
-        # 2. Generar 1,000 Empleados con NUEVA CORRELACIÓN MATEMÁTICA
-        print("Generando 1,000 perfiles de empleados con lógica proporcional...")
+        # 2. Generar 10,000 Empleados con CORRELACIÓN MATEMÁTICA (4 Dimensiones)
+        print("Generando 10,000 perfiles de empleados con lógica proporcional y encuestas de clima...")
         
         for _ in range(10000):
             distancia = random.randint(2, 50)
@@ -43,17 +50,27 @@ async def generar_datos_sinteticos():
             salario = random.randint(puesto_seleccionado["min"], puesto_seleccionado["max"])
             desempeno = round(random.uniform(1.0, 5.0), 1)
             
-            probabilidad_renuncia = 0.10 
+            # Generamos las métricas de la encuesta de clima laboral (escala 1 a 5)
+            satisfaccion_liderazgo = random.randint(1, 5)
+            balance_vida_trabajo = random.randint(1, 5)
+            clima_promedio = (satisfaccion_liderazgo + balance_vida_trabajo) / 2.0
+            
+            probabilidad_renuncia = 0.08 
             
             if distancia > 30: 
-                probabilidad_renuncia += 0.35 
+                probabilidad_renuncia += 0.30 
             if salario < (puesto_seleccionado["min"] + 2000): 
                 probabilidad_renuncia += 0.25
             
-            # NUEVA LÓGICA: Penalización proporcional lineal
-            # Si tiene 5.0, suma 0. Si tiene 1.0, suma 0.40 (40% más de riesgo)
-            penalizacion_desempeno = (5.0 - desempeno) * 0.10
+            # Penalización proporcional por bajo desempeño
+            penalizacion_desempeno = (5.0 - desempeno) * 0.08
             probabilidad_renuncia += penalizacion_desempeno
+
+            # Impacto del Clima Laboral en la probabilidad de renuncia
+            if clima_promedio < 3.0:
+                probabilidad_renuncia += 0.30
+            else:
+                probabilidad_renuncia += (5.0 - clima_promedio) * 0.05
 
             sigue_activo = random.random() > probabilidad_renuncia
 
@@ -68,12 +85,28 @@ async def generar_datos_sinteticos():
             await db.flush()
 
             db.add_all([
-                HistorialSalario(empleado_id=nuevo_empleado.id, monto_mensual=salario, fecha_cambio=nuevo_empleado.fecha_contratacion, motivo="Contratación Inicial"),
-                EvaluacionDesempeno(empleado_id=nuevo_empleado.id, fecha_evaluacion=fake.date_between(start_date='-1y', end_date='today'), puntuacion_kpi=desempeno, cumplimiento_metas=desempeno * 20)
+                HistorialSalario(
+                    empleado_id=nuevo_empleado.id,
+                    monto_mensual=salario,
+                    fecha_cambio=nuevo_empleado.fecha_contratacion,
+                    motivo="Contratación Inicial"
+                ),
+                EvaluacionDesempeno(
+                    empleado_id=nuevo_empleado.id,
+                    fecha_evaluacion=fake.date_between(start_date='-1y', end_date='today'),
+                    puntuacion_kpi=desempeno,
+                    cumplimiento_metas=desempeno * 20
+                ),
+                EncuestaClima(
+                    empleado_id=nuevo_empleado.id,
+                    fecha_encuesta=fake.date_between(start_date='-1y', end_date='today'),
+                    satisfaccion_liderazgo=satisfaccion_liderazgo,
+                    balance_vida_trabajo=balance_vida_trabajo
+                )
             ])
 
         await db.commit()
-        print("¡Dataset sintético proporcional inyectado exitosamente!")
+        print("¡Dataset sintético de 10,000 empleados con encuestas de clima inyectado exitosamente!")
 
 if __name__ == "__main__":
     asyncio.run(generar_datos_sinteticos())
