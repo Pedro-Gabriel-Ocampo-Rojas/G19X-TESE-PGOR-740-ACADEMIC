@@ -431,7 +431,7 @@ function Directorio() {
   return (
     <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '10px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
       
-      {/* MODAL DE CONTRATACIÓN CON SALARIO Y DESEMPEÑO */}
+      {/* MODAL DE CONTRATACIÓN CON SALARIO, DESEMPEÑO Y CLIMA LABORAL */}
       {modalAbierto && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 50 }}>
           <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '10px', width: '420px', maxHeight: '90vh', overflowY: 'auto' }}>
@@ -469,6 +469,10 @@ function Directorio() {
                 <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '5px' }}>Evaluación Inicial (1.0 - 5.0)</label>
                 <input type="number" required min="1" max="5" step="0.1" style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} value={formNuevo.desempeno} onChange={e => setFormNuevo({...formNuevo, desempeno: parseFloat(e.target.value)})} />
               </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '5px' }}>Clima Laboral Inicial (1.0 - 5.0)</label>
+                <input type="number" required min="1" max="5" step="0.5" style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} value={formNuevo.clima_laboral} onChange={e => setFormNuevo({...formNuevo, clima_laboral: parseFloat(e.target.value)})} />
+              </div>
               <button type="submit" disabled={procesandoCrud} style={{ padding: '12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>
                 {procesandoCrud ? 'Procesando...' : 'Registrar Contratación'}
               </button>
@@ -480,7 +484,7 @@ function Directorio() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', color: '#334155', margin: 0 }}>Directorio General de Empleados</h2>
-          <p style={{ color: '#64748b', margin: '5px 0 0 0' }}>Mostrando plantilla con métricas predictivas (Distancia, Salario, Desempeño)</p>
+          <p style={{ color: '#64748b', margin: '5px 0 0 0' }}>Mostrando plantilla con métricas predictivas (Distancia, Salario, Desempeño, Clima Laboral)</p>
         </div>
         <button onClick={() => setModalAbierto(true)} style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '10px 15px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer' }}>
           <PlusCircle size={18} /> Nueva Contratación
@@ -497,6 +501,7 @@ function Directorio() {
                 <th style={{ padding: '15px', borderBottom: '2px solid #cbd5e1', color: '#475569' }}>Distancia</th>
                 <th style={{ padding: '15px', borderBottom: '2px solid #cbd5e1', color: '#475569' }}>Salario Mensual</th>
                 <th style={{ padding: '15px', borderBottom: '2px solid #cbd5e1', color: '#475569' }}>Desempeño</th>
+                <th style={{ padding: '15px', borderBottom: '2px solid #cbd5e1', color: '#475569' }}>Clima Laboral</th>
                 <th style={{ padding: '15px', borderBottom: '2px solid #cbd5e1', color: '#475569' }}>Estado</th>
                 <th style={{ padding: '15px', borderBottom: '2px solid #cbd5e1', color: '#475569', textAlign: 'center' }}>Acciones</th>
               </tr>
@@ -520,6 +525,18 @@ function Directorio() {
                       color: emp.desempeno >= 3.5 ? '#166534' : (emp.desempeno >= 2.5 ? '#854d0e' : '#991b1b')
                     }}>
                       ⭐ {Number(emp.desempeno).toFixed(1)} / 5.0
+                    </span>
+                  </td>
+                  <td style={{ padding: '15px' }}>
+                    <span style={{ 
+                      padding: '4px 8px', 
+                      borderRadius: '6px', 
+                      fontWeight: 'bold', 
+                      fontSize: '0.85rem',
+                      backgroundColor: (emp.clima_laboral ?? 3.0) >= 3.5 ? '#f0fdf4' : ((emp.clima_laboral ?? 3.0) >= 2.5 ? '#fefce8' : '#fef2f2'),
+                      color: (emp.clima_laboral ?? 3.0) >= 3.5 ? '#166534' : ((emp.clima_laboral ?? 3.0) >= 2.5 ? '#854d0e' : '#991b1b')
+                    }}>
+                      🌤️ {Number(emp.clima_laboral ?? 3.0).toFixed(1)} / 5.0
                     </span>
                   </td>
                   <td style={{ padding: '15px' }}>
