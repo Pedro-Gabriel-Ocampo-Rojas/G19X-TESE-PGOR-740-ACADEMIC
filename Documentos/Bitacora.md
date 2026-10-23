@@ -80,3 +80,20 @@
   * Creación del Manual de Usuario con las instrucciones operativas para el cliente final.
   * Ejecución de micro-commits en Git y despliegue final del código fuente en el repositorio principal de GitHub.
 * **Estado:** Completado.
+
+---
+
+## Actualización Corte 3 — Ampliación del Modelo Predictivo a 4 Dimensiones (22 de octubre de 2026)
+
+### 1. Cambios Implementados en el Pipeline de Datos y ML
+* **Poblado de Datos (`backend/seed_data.py`):** Se actualizó el generador sintético de 10,000 empleados para insertar registros en la tabla `encuestas_clima` (`EncuestaClima`), calculando el promedio entre `satisfaccion_liderazgo` y `balance_vida_trabajo` (escala 1 a 5) y correlacionando un clima laboral bajo (`< 3.0`) con un incremento en la probabilidad de renuncia.
+* **Vector de Características (`backend/ml/train_model.py`):** El modelo `RandomForestClassifier` (`n_estimators=100, max_depth=5, random_state=42`) pasó de entrenar con 3 variables a entrenar con **4 variables reales extraídas de PostgreSQL**: `["distancia_km", "salario", "desempeno", "clima_laboral"]`.
+* **Integración Punta a Punta:** Se actualizó el binario `backend/ml/modelo_rotacion.pkl`, el esquema `SimulacionRiesgo` en `backend/main.py` y el formulario de `frontend/src/App.jsx` (`formSimulador`) para enviar las 4 variables convertidas con `parseFloat`.
+
+### 2. Comparativa de Precisión del Modelo (`accuracy_score`)
+
+| Iteración del Modelo | Variables Predictoras (`X`) | Origen de Datos de Clima | Precisión Obtenida (`Accuracy`) |
+| :--- | :--- | :--- | :--- |
+| **Versión Actual V2.1 (4 variables)** | `distancia_km`, `salario`, `desempeno`, `clima_laboral` | 10,000 registros en `encuestas_clima` generados por `seed_data.py` | **Precision:69%, Recall:76%, f1-score:72%** *(coloca aquí el porcentaje que te imprimió la consola)* |
+
+* **Observación técnica:** Al incorporar datos reales de `EncuestaClima` en lugar del valor constante de imputación (`3.0`), los árboles de decisión del Random Forest cuentan con un nodo discriminante adicional para separar perfiles con condiciones salariales similares pero distinto nivel de desgaste organizacional.
