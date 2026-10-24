@@ -338,6 +338,7 @@ Plataforma Administrativa PluriOne
                   <li><strong>Salario:</strong> ${resultadoSimulacion.parametros_analizados.salario.toLocaleString('es-MX')} MXN</li>
                   <li><strong>Distancia:</strong> {resultadoSimulacion.parametros_analizados.distancia_km} km</li>
                   <li><strong>Desempeño:</strong> {resultadoSimulacion.parametros_analizados.desempeno} / 5.0</li>
+                  <li><strong>Clima Laboral:</strong> {resultadoSimulacion.parametros_analizados.clima_laboral} / 5.0</li>
                 </ul>
                 <div style={{ padding: '10px', backgroundColor: '#f8fafc', borderRadius: '5px', borderLeft: '3px solid #3b82f6' }}>
                   <p style={{ margin: 0, fontStyle: 'italic', color: '#475569', lineHeight: '1.4' }}>

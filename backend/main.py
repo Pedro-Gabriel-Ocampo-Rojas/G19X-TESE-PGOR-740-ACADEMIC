@@ -172,9 +172,11 @@ async def simular_riesgo(datos: SimulacionRiesgo, current_user = Depends(get_cur
         if 3.0 <= datos.desempeno <= 4.5:
             fortalezas.append("mantiene un desempeño constante")
             
-        # Nueva regla XAI para el clima laboral
-        if datos.clima_laboral >= 4.0:
-            fortalezas.append("goza de un ambiente laboral positivo")
+        # Si es empleado estable (prediccion == 0), sumamos también el clima laboral si es favorable
+        if datos.clima_laboral >= 3.5:
+            fortalezas.append("percibe un clima laboral positivo y saludable")
+        elif datos.clima_laboral < 3.0:
+            fortalezas.append(f"aunque se recomienda atender su percepción de clima laboral ({datos.clima_laboral}/5.0)")
             
         if fortalezas:
             razonamiento += "Destaca que " + " y ".join(fortalezas) + "."
