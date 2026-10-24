@@ -162,6 +162,7 @@ Probabilidad de Renuncia: ${probabilidad_renuncia}
 Salario Mensual: $${parametros_analizados.salario.toLocaleString('es-MX')} MXN
 Distancia a la Oficina: ${parametros_analizados.distancia_km} km
 Evaluación de Desempeño: ${parametros_analizados.desempeno} / 5.0
+Clima Laboral: ${parametros_analizados.clima_laboral} / 5.0
 
 [ DIAGNÓSTICO DE INTELIGENCIA ARTIFICIAL ]
 ${razonamiento}
