@@ -22,15 +22,15 @@ El MVP opera bajo una arquitectura cliente-servidor desacoplada en 4 capas:
 | Capa | Tecnología / Librerías | Puerto / Ubicación | Responsabilidad en el MVP |
 | :--- | :--- | :--- | :--- |
 | **1. Presentación (Frontend)** | React + Vite + Recharts | `http://localhost:5173` | Interfaz de usuario con login, dashboard ejecutivo, directorio de personal, gestión de accesos y simulador interactivo. |
-| **2. Servicios (API REST)** | Python + FastAPI `0.141.1` + Uvicorn | `http://127.0.0.1:8000` | Exposición de endpoints asíncronos, validación de esquemas con Pydantic, protección CORS y validación de sesión. |
+| **2. Servicios (API REST)** | Python + FastAPI + Uvicorn | `http://127.0.0.1:8000` | Exposición de endpoints asíncronos, validación de esquemas con Pydantic, protección CORS y validación de sesión. |
 | **3. Seguridad y Criptografía** | `bcrypt` (`4.0.1`) + `PyJWT` (`2.8.0`) + `python-dotenv` | `backend/security.py` | Hashing irreversible de contraseñas con sal criptográfica, emisión/verificación de tokens JWT (`HS256`) y lectura estricta de variables `.env`. |
-| **4. Datos e Inferencia (BD + ML)** | PostgreSQL (`PluriOne_db`) + SQLAlchemy (`asyncpg`) + `scikit-learn` (`1.9.1`) | Puerto `5432` / `backend/ml/modelo_rotacion.pkl` | Persistencia relacional asíncrona e inferencia en memoria mediante bosque aleatorio de 100 estimadores. |
+| **4. Datos e Inferencia (BD + ML)** | PostgreSQL (`PluriOne_db`) + SQLAlchemy (`asyncpg`) + `scikit-learn` | Puerto `5432` / `backend/ml/modelo_rotacion.pkl` | Persistencia relacional asíncrona e inferencia en memoria mediante bosque aleatorio de 100 estimadores. |
 
 ---
 
 ## 3. Funciones Incluidas en la Entrega (En Alcance)
 
-A continuación se desglosan los módulos que integran la entrega actual y que se encuentran 100% operativos en el repositorio:
+A continuación se desglosan los módulos que integran la entrega actual y que se encuentran implementados y verificados de punta a punta en el repositorio (ver evidencias en la carpeta /Capturas):
 
 ### 3.1. Módulo de Seguridad, Autenticación y Control de Administradores
 * **Aislamiento de Secretos (`.env`):** Ninguna credencial reside en el código fuente. `backend/database.py` consume `DATABASE_URL` con el driver asíncrono `postgresql+asyncpg://`, `backend/security.py` exige `JWT_SECRET_KEY` (deteniendo el arranque con un `ValueError` si no está configurada) y `backend/crear_admin.py` lee `ADMIN_PASSWORD_INICIAL`.
@@ -110,3 +110,10 @@ Durante la evaluación final, cada componente del MVP se demuestra en vivo sigui
 ### Prueba 6: Reproducibilidad del Entrenamiento ML
 * **Acción:** Ejecutar en terminal dentro de `backend/`: `python ml/train_model.py`.
 * **Resultado esperado:** El script extrae las 4 tablas desde `PluriOne_db`, construye el vector `X = df_completo[["distancia_km", "salario", "desempeno", "clima_laboral"]]`, imprime la precisión (`accuracy_score`) y el reporte de clasificación en consola, y actualiza el archivo `backend/ml/modelo_rotacion.pkl`.
+  **Prueba 1.** Evidencia: Capturas/prueba1_variables_entorno.png
+  **Prueba 2.** Evidencia: Capturas/prueba2_acceso_no_autorizado_401.png
+  **Prueba 3.** Evidencia: Capturas/prueba3_login.png
+  **Prueba 4.** Evidencia: Capturas/prueba4_directorio_alta_logica.png
+  **Prueba 5.** Evidencia: Capturas/prueba5_simulador_4_variables(riesgo).png
+  **Prueba 6.** Evidencia: Capturas/prueba6_simulador_4_variables(estable).png
+  **Prueba 7.** Evidencia: Capturas/prueba7_entrenamiento_modelo.png
