@@ -34,6 +34,20 @@ El proyecto está dividido en dos servicios principales:
 - **Dashboard Analítico con Drill-Down:** Exploración de datos interactiva, modales de visualización y análisis de tendencias de retención.
 - **Exportación de Datos:** Generación en tiempo real de reportes de diagnóstico en formato `.txt`.
 
+### Naturaleza de los Datos Sintéticos y Métricas del Modelo (`seed_data.py`)
+
+Dado que por políticas de privacidad y protección de datos personales no se exponen expedientes reales de empleados en el repositorio, el sistema incluye el generador **`backend/seed_data.py`**, el cual inyecta **10,000 perfiles sintéticos** en PostgreSQL modelando reglas probabilísticas de recursos humanos:
+- **Riesgo base de rotación:** `8%` (`0.08`).
+- **Distancia a la oficina (`> 30 km`):** Incrementa la probabilidad de renuncia en `+30%` (`+0.30`).
+- **Rezago salarial (sueldo cercano al mínimo del tabulador):** Incrementa la probabilidad en `+25%` (`+0.25`).
+- **Evaluación de desempeño (`1.0 a 5.0`):** Penalización lineal proporcional a menor calificación `(5.0 - desempeno) * 0.08`.
+- **Clima laboral (`EncuestaClima` promedio `< 3.0`):** Incrementa la probabilidad de renuncia en `+30%` (`+0.30`).
+
+Al ejecutar `python ml/train_model.py`, el clasificador **`RandomForestClassifier`** entrena sobre estos 10,000 registros (80% entrenamiento, 20% prueba = 2,000 registros) para aprender dichas correlaciones sin sobreajuste (`max_depth=5`), obteniendo:
+- **Accuracy global (`67.15%`):** Proporción total de aciertos sobre los 2,000 casos de prueba considerando la componente de aleatoriedad estocástica (`random.random() > probabilidad_renuncia`).
+- **Precision en clase de fuga (`0.69` / `69%`):** De cada 100 empleados que el modelo clasifica en riesgo de renuncia, 69 corresponden a bajas reales en el conjunto de prueba.
+- **Recall en clase de fuga (`0.76` / `76%`):** El modelo logra detectar de forma preventiva al **76%** del total de empleados que efectivamente causan baja.
+
 ---
 
 ## 3. Guía de Instalación y Orden de Arranque
