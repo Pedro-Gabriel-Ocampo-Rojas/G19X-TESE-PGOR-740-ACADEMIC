@@ -94,6 +94,6 @@
 
 | Iteración del Modelo | Variables Predictoras (`X`) | Origen de Datos de Clima | Precisión Obtenida (`Accuracy`) |
 | :--- | :--- | :--- | :--- |
-| **Versión Actual V2.1 (4 variables)** | `distancia_km`, `salario`, `desempeno`, `clima_laboral` | 10,000 registros en `encuestas_clima` generados por `seed_data.py` | **Precision:69%, Recall:76%, f1-score:72%** *(coloca aquí el porcentaje que te imprimió la consola)* |
+| **Versión Actual V2.1 (4 variables)** | `distancia_km`, `salario`, `desempeno`, `clima_laboral` | 10,000 registros en `encuestas_clima` generados por `seed_data.py` | | **Versión Actual v2.1 (4 variables)** | `distancia_km`, `salario`, `desempeno`, `clima_laboral` | 10,000 encuestas sintéticas generadas en `encuestas_clima` por `seed_data.py` | **67.15%** | **Precision:** `0.69` (69%) · **Recall:** `0.76` (76%) · **F1-Score:** `0.72` |
 
 * **Observación técnica:** Al incorporar datos reales de `EncuestaClima` en lugar del valor constante de imputación (`3.0`), los árboles de decisión del Random Forest cuentan con un nodo discriminante adicional para separar perfiles con condiciones salariales similares pero distinto nivel de desgaste organizacional.
