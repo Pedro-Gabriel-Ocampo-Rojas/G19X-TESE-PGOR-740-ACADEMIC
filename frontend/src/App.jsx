@@ -314,7 +314,7 @@ Plataforma Administrativa PluriOne
             </div>
             <div>
               <label style={{ display: 'block', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '5px' }}>Salario Mensual (MXN)</label>
-              <input type="number"required min="8000" max="100000" step="500" placeholder="Mínimo $8,000 MXN" required style={{ width: '100%', padding: '8px', borderRadius: '5px', border: '1px solid #cbd5e1' }} value={formSimulador.salario} onChange={e => setFormSimulador({...formSimulador, salario: e.target.value})} />
+              <input type="number" min="8000" max="100000" step="500" placeholder="Mínimo $8,000 MXN" required style={{ width: '100%', padding: '8px', borderRadius: '5px', border: '1px solid #cbd5e1' }} value={formSimulador.salario} onChange={e => setFormSimulador({...formSimulador, salario: e.target.value})} />
             </div>
             <div>
               <label style={{ display: 'block', fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '5px' }}>Evaluación (1.0 - 5.0)</label>
@@ -395,20 +395,17 @@ function Directorio() {
     distancia_oficina_km: 10,
     salario: 25000,
     desempeno: 3.5,
-    clima_laboral: 1
+    clima_laboral: 3.5
   })
 
   const cargarDatos = () => {
-    api.get('/empleados?limite=1000')
+    api.get('/empleados')
       .then(respuesta => { setEmpleados(respuesta.data.datos); setCargando(false) })
       .catch(() => setCargando(false))
   }
 
   useEffect(() => {
-    // Ahora pide TODOS los registros, no importa si son 100 o 10,000
-    api.get('/empleados')
-      .then(respuesta => { setEmpleados(respuesta.data.datos); setCargando(false) })
-      .catch(() => setCargando(false))
+    cargarDatos()
   }, [])
 
   const manejarContratacion = async (e) => {
