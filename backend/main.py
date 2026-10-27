@@ -222,7 +222,7 @@ async def contratar_empleado(empleado: NuevoEmpleado, db: AsyncSession = Depends
         balance_vida_trabajo=int(math.ceil(empleado.clima_laboral))
     )
     
-    db.add_all([historial, evaluacion])
+    db.add_all([historial, evaluacion, nueva_encuesta])
     await db.commit()
     await db.refresh(nuevo)
     return {"mensaje": "Empleado contratado exitosamente", "id": str(nuevo.id), "admin_responsable": admin}
