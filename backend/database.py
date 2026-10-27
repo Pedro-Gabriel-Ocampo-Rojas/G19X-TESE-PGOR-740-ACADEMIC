@@ -12,8 +12,11 @@ SQLALCHEMY_DATABASE_URL = os.getenv(
     "postgresql+asyncpg://usuario:password@localhost:5432/PluriOne_db"
 )
 
+# Lee DB_ECHO del .env con False por omisión para evitar imprimir cada SQL en seed_data.py
+DB_ECHO = os.getenv("DB_ECHO", "False").lower() in ("true", "1", "yes")
+
 # Motor asíncrono
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=True)
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=DB_ECHO)
 SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = declarative_base()
