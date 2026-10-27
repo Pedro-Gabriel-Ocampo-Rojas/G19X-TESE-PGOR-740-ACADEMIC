@@ -148,8 +148,8 @@ Capa heurística de post-procesamiento en `backend/main.py` que traduce los fact
 
 - **Regla 1 (Desgaste por Traslado):** Se activa si $\text{distancia\_km} > 20$.
 - **Regla 2 (Umbral Salarial):** Se activa si $\text{salario} < \$20,000 \text{ MXN}$.
-- **Regla 3 (Subvaloración Salarial):** Se activa si $\text{desempeno} \ge 4.0$ y $\text{salario} < \$25,000 \text{ MXN}$ (talento sobresaliente con remuneración rezagada).
-- **Regla 4 (Bajo Desempeño):** Se activa si $\text{desempeno} < 3.0$.
+- **Regla 3 (Subvaloración Salarial):** Se activa si $\text{desempeno} > 4.0$ y $\text{salario} < \$25,000 \text{ MXN}$ (talento sobresaliente con remuneración rezagada).
+- **Regla 4 (Bajo Desempeño):** Se activa si $\text{desempeno} < 2.5$.
 - **Regla 5 (Desgaste de Clima Organizacional):** Se activa si $\text{clima\_laboral} < 3.0$, alertando fricción en liderazgo o balance vida-trabajo.
 
 ### 5.3 Naturaleza de los Datos Sintéticos (`seed_data.py`) e Interpretación de Métricas
