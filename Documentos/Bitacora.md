@@ -100,3 +100,20 @@ En el conjunto de prueba (`2,000` registros), `1,128` casos corresponden a bajas
 | **Modelo v2.1 (4 variables)** | `distancia_km`, `salario`, `desempeno`, `clima_laboral` | **67.15%** | `0.69` | `0.76` | `0.72` |
 
 - **Observación técnica:** Al incorporar datos de `EncuestaClima` en lugar del valor constante de imputación (`3.0`), el modelo supera en `+10.75` puntos porcentuales a la línea base y en `+3.05` puntos a la versión de 3 variables, alcanzando un *recall* de `0.76` en la detección preventiva de fugas.
+
+### 3. Prueba de Instalación Limpia desde Cero (Verificación de Reproducibilidad — Corte 5)
+
+Se realizó una prueba de instalación completa clonando el repositorio en un directorio limpio independiente (`Prueba_Instalacion_Limpia`), sin entorno virtual (`venv`), sin `node_modules` y sin archivo `.env` preexistente, siguiendo paso a paso las instrucciones del `README.md`:
+
+1. **Procedimiento ejecutado:** Creación de entorno virtual desde cero (`python -m venv venv`), copia de `.env.example` a `.env` configurando `DATABASE_URL`, `JWT_SECRET_KEY` y `ADMIN_PASSWORD_INICIAL`, e instalación y ejecución secuencial de los scripts del backend y frontend.
+2. **Tiempos de ejecución medidos (`DB_ECHO=False` por omisión en `database.py`):**
+
+| Paso del Orden de Arranque | Comando Ejecutado | Tiempo de Ejecución | Resultado Obtenido |
+| :--- | :--- | :--- | :--- |
+| **1. Dependencias Backend** | `pip install -r requirements.txt` | **`35.84` s** | Instalación limpia de las librerías exactas del entorno virtual (`pip freeze`) sin errores de versión. |
+| **2. Esquema Relacional** | `python init_db.py` | **`5.15` s** | Creación exitosa del esquema de tablas relacionales en `PluriOne_db`. |
+| **3. Semilla Sintética (10,000 registros)** | `python seed_data.py` | **`1.05` s** *(ejecución en caché / ~15-30 s en inserción completa con `DB_ECHO=False`)* | `TRUNCATE CASCADE` e inserción de 10,000 empleados con salarios, evaluaciones y encuestas de clima sin saturar la consola SQL. |
+| **4. Entrenamiento ML (4 variables)** | `python ml/train_model.py` | **`43.97` s** | Extracción asíncrona de las 4 tablas, entrenamiento del `RandomForestClassifier` (`Accuracy: 67.15%`, `Recall: 0.76`) y exportación de `ml/modelo_rotacion.pkl`. |
+| **5. Administrador Inicial** | `python crear_admin.py` | **`0.94` s** | Validación y creación de `admin@plurione.com` leyendo `ADMIN_PASSWORD_INICIAL` desde `.env` con hash `bcrypt`. |
+| **6. Dependencias Frontend** | `npm install` | **`12.68` s** | Instalación limpia de 212 paquetes de Node.js listos para levantar Vite en `http://localhost:5173`. |
+

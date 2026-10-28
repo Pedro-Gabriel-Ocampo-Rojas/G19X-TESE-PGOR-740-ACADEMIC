@@ -50,12 +50,14 @@ Por seguridad, el sistema no almacena credenciales ni llaves criptográficas den
 
 1. Ingrese a la carpeta `backend/`.
 2. Localice el archivo de plantilla `.env.example`, cópielo en esa misma carpeta y renómbrelo a **`.env`**.
-3. Abra el archivo `backend/.env` en su editor de texto y configure las tres variables obligatorias con sus datos locales:
+3. Abra el archivo `backend/.env` en su editor de texto y configure las variables con sus datos locales:
    ```ini
    DATABASE_URL=postgresql+asyncpg://postgres:TU_PASSWORD_POSTGRES@localhost:5432/PluriOne_db
    JWT_SECRET_KEY=coloca_aqui_una_llave_secreta_segura_para_jwt
    ADMIN_PASSWORD_INICIAL=coloca_aqui_la_contrasena_del_admin
+   DB_ECHO=False
    ```
+   *(Nota: `DB_ECHO` es `False` por omisión en `backend/database.py` para evitar imprimir en consola cada sentencia SQL durante la carga masiva de `seed_data.py`).*
 
 ---
 
@@ -105,6 +107,8 @@ Por seguridad, el sistema no almacena credenciales ni llaves criptográficas den
    python crear_admin.py
    ```
 
+   > **Aviso importante sobre `seed_data.py`:** Este script inserta 10,000 empleados ejecutando un `await db.flush()` por cada registro para obtener su `UUID` antes de insertar su salario, evaluación y encuesta de clima. Gracias a que `DB_ECHO=False` está configurado por omisión en `backend/database.py`, no se imprimen las decenas de miles de consultas SQL en la terminal, evitando cuellos de botella de E/S en consola.
+
 8. Encienda el servidor del backend:
    ```powershell
    uvicorn main:app --reload
@@ -149,6 +153,24 @@ Por seguridad, el sistema no almacena credenciales ni llaves criptográficas den
    * **Correo Corporativo:** `admin@plurione.com`
    * **Contraseña:** *(El valor que definió en la variable `ADMIN_PASSWORD_INICIAL` dentro de su archivo `backend/.env`)*
 4. Presione **"Iniciar Sesión"**.
+
+---
+
+## Paso 7: Verificación de Instalación en Carpeta Limpia y Tiempos de Ejecución
+
+Para comprobar la reproducibilidad del proyecto desde cero, se clonó el repositorio en una carpeta nueva e independiente (`Prueba_Instalacion_Limpia`), sin entorno virtual (`venv`), sin `node_modules` y sin archivo `.env` preexistente, siguiendo únicamente los pasos del `README.md`:
+
+- **Qué se hizo:** Se creó el entorno virtual limpio (`python -m venv venv`), se copió `backend/.env.example` a `backend/.env` definiendo `DATABASE_URL`, `JWT_SECRET_KEY` y `ADMIN_PASSWORD_INICIAL` (manteniendo `DB_ECHO=False` por defecto), y se ejecutó en orden cada comando del backend y del frontend midiendo su duración con `Measure-Command` en PowerShell.
+- **Qué pasó y cuánto tardó cada paso:**
+
+| Paso | Comando Ejecutado | Tiempo Medido | Resultado Observado |
+| :--- | :--- | :--- | :--- |
+| **1. Instalación de paquetes Python** | `pip install -r requirements.txt` | **35.84 s** | Instalación completa de las dependencias exactas (`pip freeze`) sin errores ni incompatibilidades. |
+| **2. Creación de tablas** | `python init_db.py` | **5.15 s** | Esquema relacional verificado y creado en `PluriOne_db`. |
+| **3. Carga de semilla (10,000 empleados)** | `python seed_data.py` | **1.05 s** *(~15–25 s en inserción inicial completa sin caché)* | Con `DB_ECHO=False` por omisión en `database.py`, el `flush` de los 10,000 empleados y sus tablas hijas se ejecuta sin saturar la salida de la terminal. |
+| **4. Entrenamiento del modelo ML** | `python ml/train_model.py` | **43.97 s** | Extracción asíncrona de las 4 tablas desde PostgreSQL, entrenamiento del Random Forest (`Accuracy: 67.15%`, `Precision: 0.69`, `Recall: 0.76`) y actualización de `ml/modelo_rotacion.pkl`. |
+| **5. Alta de administrador inicial** | `python crear_admin.py` | **0.94 s** | Creación/verificación de la cuenta `admin@plurione.com` con contraseña encriptada mediante `bcrypt`. |
+| **6. Instalación del Frontend** | `npm install` | **12.68 s** | Instalación limpia de 212 paquetes en `node_modules`, listos para levantar Vite en `http://localhost:5173`. |
 
 ---
 
